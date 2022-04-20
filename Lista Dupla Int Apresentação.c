@@ -4,260 +4,246 @@
 #include <stdlib.h>
 
 typedef struct node{
-    struct node *next;     //Item da lista
-		struct node *back;
-    int dado; 
+	struct node *next;     //Item da lista
+	struct node *back;
+	int dado; 
 } Node;
 
 typedef struct {
-    Node *head;
-    Node *tail;						 //Lista
-    int size;
+	Node *head;
+	Node *tail;						 //Lista
+	int size;
 } Lista;
 
 
 Lista* criaLista(){
-    Lista* lista;
-    lista = (Lista*) malloc(sizeof(Lista));
-    if (lista == NULL)
-        return NULL;
-    else {
-        lista->head = NULL;						//Alocar lista
-        lista->tail = NULL;
-        lista->size = 0;
-    }
-    
-    return lista;
+	Lista* lista;
+	lista = (Lista*) malloc(sizeof(Lista));
+	if (lista == NULL)
+		return NULL;
+	else {
+		lista->head = NULL;						//Alocar lista
+		lista->tail = NULL;
+		lista->size = 0;
+	}
+	
+	return lista;
 }
 
 
 Node* criaElemento(int dado){
-    Node* nodo;
-    nodo = (Node*) malloc(sizeof(Node));
-    if (nodo == NULL)
-			return NULL;								//Aloca elemento
-    else {
-			nodo -> next = NULL;
-			nodo -> back = NULL;
-			nodo -> dado = dado;
-    }
-    
-    return nodo;
+	Node* nodo;
+	nodo = (Node*) malloc(sizeof(Node));
+	if (nodo == NULL)
+		return NULL;								//Aloca elemento
+	else {
+		nodo -> next = NULL;
+		nodo -> back = NULL;
+		nodo -> dado = dado;
+	}
+	
+	return nodo;
 }
 
 
-int insereElementoNaLista(Lista* lista, Node* pivo, int dado){
-    Node* novo = criaElemento(dado);
-    if (novo == NULL){
-			return -1;
+void insereElementoNaLista(Lista* lista, Node* pivo, int dado){
+	Node* novo = criaElemento(dado);
+
+	if (novo == NULL){
+		printf("Erro ao alocar o elemento\n\n");
+		return;
+	}
+
+	if(pivo == NULL && lista -> size != 0){
+		printf("Pivo é nulo, mas a lista não é vazia\n\n");
+		return;
+	}
+	
+	if( lista -> size == 0 ){
+		lista -> head = novo;
+		lista -> tail = novo;
+	} else {
+		novo -> next = pivo -> next;
+		novo -> back = pivo;
+
+		if(pivo -> next == NULL){
+			lista -> tail = novo;
+		} else {
+			pivo -> next -> back = novo;
 		}
 
-		novo -> dado = dado; 
+		pivo -> next = novo;
+	}
 
-    if (pivo == NULL){
-        if (lista -> size == 0){
-					lista -> head = novo;					
-				} else {
-        	novo -> next = lista -> head;
-					lista -> head -> back = novo;
-					lista -> head = novo;											//Insere elemento na lista
-				}
-		} else {
-			if (pivo -> next == NULL){
-				novo -> back = lista -> tail;
-				lista -> tail = novo;
-			} else {
-				novo -> next = pivo -> next;
-				novo -> back = pivo;
-				pivo -> next = novo;
-			}
-    }
-    lista -> size++;
-    return 0;
+	printf("Valor %i inserido com sucesso\n", novo -> dado);
+	lista -> size++;
+	return;
 }
 
 
 void percorreLista(Lista* lista, int decisao){
-    Node* aux;
+	Node* aux;
 
-		if(lista -> size == 0){
-			printf("Lista vazia!\n\n");
-			return;
-		}
+	if(lista -> size == 0){
+		printf("Lista vazia!\n\n");
+		return;
+	}
 
-		if(decisao == 1){
-			aux = lista->head;
-	    
-	    while(aux != NULL){									//Percore a lista comeco -> fim
-				printf("%i, ", aux->dado);
-				aux = aux->next;
-			}
-		}	else if (decisao == -1){
-			aux = lista->tail;
-	    
-	    while(aux != NULL){									//Percore a lista fim -> comeco
-				printf("%i, ", aux->dado);
-				aux = aux->back;
-			}
+	if(decisao == 1){
+		aux = lista->head;
+		
+		while(aux != NULL){									//Percore a lista comeco -> fim
+			printf("%i, ", aux->dado);
+			aux = aux->next;
 		}
+	}	else if (decisao == -1){
+		aux = lista->tail;
+		
+		while(aux != NULL){									//Percore a lista fim -> comeco
+			printf("%i, ", aux->dado);
+			aux = aux->back;
+		}
+	}
 	printf("\n\n");
 }
 
 
-int removeElementoDaLista(Lista* lista, Node* pivo){
-    Node* antigo;
-    int dado;
-    
-    if (lista -> size == 0){
-			return -1;							//lista vazia
-		}
-	
-    if (pivo == NULL){
-        antigo = lista -> head;
-        lista -> head = lista -> head -> next;
+void removeElementoDaLista(Lista* lista, Node* elem){
 
-        if (lista -> head == NULL){  //excluido era ultimo elemento
-					lista -> tail = NULL;
-				} else {
-					lista -> head -> back = NULL;
-				}
-    } else {
-        if (pivo -> next == NULL){
-					return -2; 								//pivo é p ultimo elemento da lista
-				}
-
-				antigo = pivo -> next;
-				pivo -> next = antigo -> next;
-
-        if (pivo -> next == NULL){
-					lista -> tail = pivo; 		//atualiza o tail caso o pivo seja o ultimo elemento
-				}
+	if(elem != NULL && lista -> size != 0){
+		if(elem == lista ->head){
+			lista -> head = elem -> next;
+			if(lista -> head == NULL){
+				lista -> tail = NULL;
 			}
-    
-    dado = antigo -> dado;
-    free(antigo);
+			else {
+				elem -> next -> back = NULL;
+			}
+		}
+		else{
+			elem -> back -> next = elem -> next;
+			if(elem -> next == NULL){
+				lista -> tail = elem-> back;
+			}
+			else{
+				elem -> next -> back = elem -> back;
+			}
+		}
+	} else {
+		return;
+	}
 
-    lista -> size--;
-    
-    return dado;
+	printf("Elemento %i excluido da lista\n", elem -> dado);
+
+	free (elem);
+	lista -> size --;
+
+	return;
 }
 
 
 Node* pesquisaNaLista(Lista* lista, int dado){
-    Node* aux;
-    aux = lista -> head;
-    
-    while(aux != NULL){
-        if (aux -> dado == dado){
-            return aux;
-        }
-        aux = aux -> next;
-    }
-    return NULL;
+	Node* aux;
+	aux = lista -> head;
+	
+	while(aux != NULL){
+		if (aux -> dado == dado){
+			return aux;
+		}
+		aux = aux -> next;
+	}
+	return NULL;
 }
 
 
 void limpaLista(Lista* lista){
-    while(lista -> head != NULL){
-      removeElementoDaLista(lista, NULL);
-    }
-    
-    free(lista);
+	while(lista -> head != NULL){
+		removeElementoDaLista(lista, lista->head);
+	}
+	
+	free(lista);
+	printf("Lista desalocada\n");
 }
 
 
 int main(){
-    int dado;
-    Node* pivo;
-    Lista* list = criaLista();
-    if (list == NULL){
-        printf("Impossivel alocar memoria para a lista.\n");
-        return -1;
-    }
+	int dado;
+	Node* pivo;
+	Lista* list = criaLista();
 
-		percorreLista(list,1);
-	
-    insereElementoNaLista(list, list->tail, 15);
-		printf("Numero %i inserido na lista\n", 15);
+	if (list == NULL){
+		printf("Impossivel alocar memoria para a lista.\n");
+		return -1;
+	}
 
-		percorreLista(list,1);
-	
-    insereElementoNaLista(list, list->tail, 25);
-		printf("Numero %i inserido na lista\n", 25);
-	
-		percorreLista(list,1);
-	
-    insereElementoNaLista(list, list->head, 10);
-		printf("Numero %i inserido na lista\n", 10);
-	
-		percorreLista(list,1);
-	
-    insereElementoNaLista(list, NULL, 35);
-		printf("Numero %i inserido na lista\n", 35);
-	
-		percorreLista(list,1);
-	
-		insereElementoNaLista(list, list->head, 35);
-		printf("Numero %i inserido na lista\n", 35);
-	
-		percorreLista(list,1);
-	
-		pivo = pesquisaNaLista(list, 10);
-		insereElementoNaLista(list, pivo, 27);
-		printf("Numero %i inserido na lista\n", 27);
+	percorreLista(list,1);
 
-		percorreLista(list,1);		
+	insereElementoNaLista(list, list->tail, 15);
+
+	percorreLista(list,1);
+
+	insereElementoNaLista(list, list->tail, 25);
+
+	percorreLista(list,1);
+
+	insereElementoNaLista(list, list->head, 10);
+
+	percorreLista(list,1);
+
+	insereElementoNaLista(list, NULL, 35);
+
+	percorreLista(list,1);
+
+	insereElementoNaLista(list, list->head, 35);
+
+	percorreLista(list,1);
+
+	pivo = pesquisaNaLista(list, 10);
+	insereElementoNaLista(list, pivo, 27);
+
+	percorreLista(list,1);		
+
+	insereElementoNaLista(list, list->tail, 29);
+
+	percorreLista(list,1);
+
+	insereElementoNaLista(list, NULL, 45);
+
+	percorreLista(list,1);
+	percorreLista(list,-1);
 	
-		insereElementoNaLista(list, list->tail, 29);
-		printf("Numero %i inserido na lista\n", 29);
+	removeElementoDaLista(list, list -> tail);
 
-		percorreLista(list,1);
+	percorreLista(list,1);
+
+	removeElementoDaLista(list, list -> head);
+
+	percorreLista(list,1);
+
+	removeElementoDaLista(list, NULL);
+
+	percorreLista(list,1);
+
+	pivo = pesquisaNaLista(list, 55);
+	removeElementoDaLista(list, pivo);
+
+	percorreLista(list,1);
+
+	pivo = pesquisaNaLista(list, 27);
+	removeElementoDaLista(list, pivo);
+
+	percorreLista(list,1);
+
+	removeElementoDaLista(list, list -> head);
+
+	percorreLista(list,1);
+
+	pivo = pesquisaNaLista(list, 10);
+	removeElementoDaLista(list, pivo);
+
+	percorreLista(list,-1);
+	percorreLista(list,1);
 	
-		insereElementoNaLista(list, NULL, 45);
-		printf("Numero %i inserido na lista\n", 45);
-	
-    percorreLista(list,1);
-		percorreLista(list,-1);
-    
-    dado = removeElementoDaLista(list, list -> tail);
-    printf("\nExcluido o valor %i da lista\n", dado);
-
-		percorreLista(list,1);
-
-		dado = removeElementoDaLista(list, list -> head);
-    printf("\nExcluido o valor %i da lista\n", dado);
-
-		percorreLista(list,1);
-	
-		dado = removeElementoDaLista(list, NULL);
-    printf("\nExcluido o valor %i da lista\n", dado);
-
-		percorreLista(list,1);
-
-		pivo = pesquisaNaLista(list, 55);
-		dado = removeElementoDaLista(list, pivo);
-    printf("\nExcluido o valor %i da lista\n", dado);
-
-		percorreLista(list,1);
-
-		pivo = pesquisaNaLista(list, 27);
-		dado = removeElementoDaLista(list, pivo);
-    printf("\nExcluido o valor %i da lista\n", dado);
-	
-		percorreLista(list,1);
-
-		dado = removeElementoDaLista(list, list -> head);
-    printf("\nExcluido o valor %i da lista\n", dado);
-
-		percorreLista(list,1);
-
-		pivo = pesquisaNaLista(list, 10);
-		dado = removeElementoDaLista(list, pivo);
-    printf("\nExcluido o valor %i da lista\n", dado);
-
-		percorreLista(list,-1);
-		percorreLista(list,1);
-    
-    limpaLista(list);
-    return 0;
+	limpaLista(list);
+	return 0;
 }
